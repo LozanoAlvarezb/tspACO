@@ -4,6 +4,8 @@ import sim.field.network.Network;
 import sim.util.Double2D;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Sim extends SimState {
 
@@ -25,16 +27,17 @@ public class Sim extends SimState {
 
     // Parameters
     private int nAnts = 131;
-    private double history = 5;
+    private double history = 1;
     private double heuristic = 5;
-    private double decayFactor = 0.1;
-    private double pheromoneChangeFactor = 1;
+    private double decayFactor = 0.02;
+    private double pheromoneChangeFactor = 131;
     private double initialPheromone = 1.0;
 
     // Model
-    private String model = "MMAX"; // Default parameter. Models = {"AS","EAS","ASrank","MMAS"}
+    private String model = "MMAS"; // Models = {"AS","EAS","ASrank","MMAS"}
     private double pheromoneMax = 10;
     private double pheromoneMin = 1.7;
+    private int nRank = 6;
     private double elitist = 1;
 
     // Start node
@@ -97,7 +100,7 @@ public class Sim extends SimState {
         super.start();  // clear out the schedule
 
         // load the graph from a file
-        ArrayList<int []> nodesPos = GraphLoad.loadFromFile("/home/borja_lozano/Projects/Multiagent/mason_tsp/data/xqf131.tsp");
+        ArrayList<int []> nodesPos = GraphLoad.loadFromFile("/Users/borjalozanoalvarez/Projects/MASON/tspACO/data/xqf131.tsp");
 
         // setup the world
         environment = new Continuous2D(nodesPos.size(),XMAX-(XMIN),YMAX-(YMIN));
@@ -145,11 +148,28 @@ public class Sim extends SimState {
             if(!ant.isDone())
                 return;
 
+//        System.out.println("Old ants order :");
+//        for (Ant ant:ants)
+//        {
+//            System.out.println(ant.getacumulatedDistance());
+//
+//        }
+
+        Collections.sort(ants, Comparator.comparingDouble(Ant::getacumulatedDistance));
+
+//        System.out.println();
+//        System.out.println("New ants order :");
+//        for (Ant ant:ants)
+//        {
+//            System.out.println(ant.getacumulatedDistance());
+//
+//        }
+
         Ant bestAnt = ants.get(0);
 
-        for (Ant ant:ants)
-            if(bestAnt.getacumulatedDistance() > ant.getacumulatedDistance())
-                bestAnt=ant;
+//        for (Ant ant:ants)
+//            if(bestAnt.getacumulatedDistance() > ant.getacumulatedDistance())
+//                bestAnt=ant;
 
         System.out.println("Local min travel: " + bestAnt.getacumulatedDistance());
         if(bestTravelDistance==0 || bestAnt.getacumulatedDistance()<bestTravelDistance) {
@@ -187,11 +207,12 @@ public class Sim extends SimState {
                 {
                     double deltaPheromone = 0;
                     if(bestAnt.pathContainsEdge(edge))
-                        deltaPheromone += decayFactor * bestAnt.getacumulatedDistance();
-                    for(Ant ant:ants)
-                        if(ant.pathContainsEdge(edge))
-                            deltaPheromone += (pheromoneChangeFactor/
+                        deltaPheromone += elitist * (1/bestAnt.getacumulatedDistance());
+                    for(Ant ant:ants) {
+                        if (ant.pathContainsEdge(edge))
+                            deltaPheromone += (pheromoneChangeFactor /
                                     ant.getacumulatedDistance());
+                    }
 
                     double newPheromone = (1-decayFactor)*edge.getPheromone()+
                             deltaPheromone;
@@ -199,6 +220,28 @@ public class Sim extends SimState {
                 }
                 break;
 
+            case "ASrank":
+                // update pheromone of each edge
+                for(PathEdge edge:edges)
+                {
+                    int i=0;
+                    double deltaPheromone = 0;
+                    if(bestAnt.pathContainsEdge(edge))
+                        deltaPheromone += nRank * bestAnt.getacumulatedDistance();
+                    for(Ant ant:ants) {
+                        if (ant.pathContainsEdge(edge))
+                            deltaPheromone += (1 /
+                                    ant.getacumulatedDistance());
+                        if(i>=nRank)
+                            break;
+                        i++;
+                    }
+
+                    double newPheromone = (1-decayFactor)*edge.getPheromone()+
+                            deltaPheromone;
+                    edge.setPheromone(newPheromone);
+                }
+                break;
             // Min-Max
             case "MMAX":
                 // update pheromone of each edge
