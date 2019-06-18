@@ -26,7 +26,7 @@ public class Sim extends SimState {
     private ArrayList<PathEdge> edges = null;
 
     // Parameters
-    private int nAnts = 131;
+    private int nAnts = 300;
     private double history = 1;
     private double heuristic = 5;
     private double decayFactor = 0.02;
@@ -100,7 +100,7 @@ public class Sim extends SimState {
         super.start();  // clear out the schedule
 
         // load the graph from a file
-        ArrayList<int []> nodesPos = GraphLoad.loadFromFile("/Users/borjalozanoalvarez/Projects/MASON/tspACO/data/xqf131.tsp");
+        ArrayList<int []> nodesPos = GraphLoad.loadFromFile("/Users/borjalozanoalvarez/Projects/MASON/tspACO/data/pma343");
 
         // setup the world
         environment = new Continuous2D(nodesPos.size(),XMAX-(XMIN),YMAX-(YMIN));
@@ -114,6 +114,8 @@ public class Sim extends SimState {
             if(pos[1]>ROWS)ROWS=pos[0]+4;
         }
 
+        System.out.println(ROWS);
+        System.out.println(COLS);
         boolean started = false;
         // create the nodes and edges
         for(int[] pos:nodesPos)

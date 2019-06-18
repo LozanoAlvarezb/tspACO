@@ -75,7 +75,6 @@ public class Ant implements Steppable
                     return;
                 }
             }
-
             reset();
             return;
         }

@@ -31,10 +31,10 @@ public class GraphLoad extends Throwable{
     }
 
     public static void main(String[] args){
-        /*for (int[] pos:
-        loadFromFile("/home/borja_lozano/Projects/Multiagent/mason_tsp/data/xqf131.tsp")) {
+        for (int[] pos:
+        loadFromFile("/Users/borjalozanoalvarez/Projects/MASON/tspACO/data/xit1083")) {
             System.out.println(pos[0]+ " : " + pos[1]);
 
-        }*/
+        }
     }
 }
