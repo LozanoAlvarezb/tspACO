@@ -19,6 +19,7 @@ public class PathEdge extends Edge {
         setInfo("" + String.format("%.3f", pheromone));
     }
 
+
     public double getLength() {
         return edgeLength;
     }
